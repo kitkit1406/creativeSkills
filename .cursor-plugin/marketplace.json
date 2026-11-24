@@ -1,0 +1,16 @@
+{
+  "name": "creative-skills",
+  "owner": {
+    "name": "kitkit1406"
+  },
+  "metadata": {
+    "description": "Creative marketing and product build skills for apps and websites"
+  },
+  "plugins": [
+    {
+      "name": "creative-skills",
+      "source": ".",
+      "description": "Creative marketing, app/website design, CTO, and web/app inspection skills"
+    }
+  ]
+}
