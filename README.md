@@ -28,4 +28,18 @@ skills/
   cto/SKILL.md
   web-and-app-designer/SKILL.md
   web-and-app-inspector/SKILL.md
+nearxx/
+  index.html
+  styles.css
+  app.js
 ```
+
+## NEARXX demo
+
+Redesign mockup of provider onboarding Step 1 (“Your name and contact”) — new light, place-led visual direction (not a pixel clone of the old dark UI):
+
+```bash
+cd nearxx && python3 -m http.server 8765 --bind 127.0.0.1
+```
+
+Open `http://127.0.0.1:8765/`.
