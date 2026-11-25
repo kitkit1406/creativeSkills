@@ -36,7 +36,7 @@ nearxx/
 
 ## NEARXX demo
 
-Static recreation of the provider onboarding Step 1 screen (“Your name and contact”):
+Redesign mockup of provider onboarding Step 1 (“Your name and contact”) — new light, place-led visual direction (not a pixel clone of the old dark UI):
 
 ```bash
 cd nearxx && python3 -m http.server 8765 --bind 127.0.0.1

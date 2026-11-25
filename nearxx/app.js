@@ -1,4 +1,4 @@
-const form = document.getElementById("name-contact-form");
+const form = document.getElementById("mock-form");
 const profileName = document.getElementById("profile-name");
 const toast = document.getElementById("toast");
 let toastTimer;
@@ -17,16 +17,16 @@ form.addEventListener("submit", (event) => {
   const name = profileName.value.trim();
   if (!name) {
     profileName.focus();
-    showToast("Add a profile name to continue.");
+    showToast("Mockup: add a profile name to continue.");
     return;
   }
-  showToast(`Saved “${name}”. Continue to step 2.`);
+  showToast(`Mockup: continue with “${name}”.`);
 });
 
 document.getElementById("edit-details").addEventListener("click", () => {
-  showToast("Open name, age and details.");
+  showToast("Mockup: edit name, age and details.");
 });
 
 document.getElementById("add-contact").addEventListener("click", () => {
-  showToast("Add how clients contact you.");
+  showToast("Mockup: add client contact options.");
 });
