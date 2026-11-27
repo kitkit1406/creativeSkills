@@ -16,7 +16,8 @@ Cursor plugin with skills for creative marketing, product builds, and a NAS100 p
 ### NAS100 intraday
 | Skill | Use when |
 | --- | --- |
-| `nas100-instrument` | Symbols, sessions, costs, data conventions |
+| `nas100-instrument` | Symbols, sessions, costs, data conventions (Vantage default) |
+| `nas100-vantage` | Vantage Markets venue playbook (MT5 `NAS100.r`) |
 | `nas100-intraday-breakout` | Consolidation / level breakouts |
 | `nas100-intraday-gap` | Cash-open gap continue / fade |
 | `nas100-intraday-momentum` | Trend-day continuation |
@@ -46,7 +47,7 @@ Cursor plugin with skills for creative marketing, product builds, and a NAS100 p
 
 See [`agents/nas100-paper-team/`](agents/nas100-paper-team/) for an Agent SDK team that:
 
-- Paper-trades NAS100 (`CME_MINI:NQ1!`) with a simulated ledger
+- Paper-trades Vantage NAS100 (`VANTAGE:NAS100` / MT5 `NAS100.r`) with a simulated lot ledger
 - Delegates to intraday, scalper, risk, and weekly-coach subagents
 - Runs weekday session + Sunday improvement schedules
 

@@ -1,9 +1,14 @@
 export type Side = "long" | "short";
 
 export type PaperConfig = {
+  venue: string;
   symbol: string;
+  mt5Symbol: string;
   equity: number;
+  /** USD P&L per index point per 1.0 lot (Vantage NAS100 cash CFD ≈ $1). */
   pointValue: number;
+  minLot: number;
+  lotStep: number;
   spreadPoints: number;
   slippagePoints: number;
   riskPerTradePct: number;
@@ -21,6 +26,7 @@ export type PaperFill = {
   closedAt?: string;
   skill: string;
   side: Side;
+  /** Lot size (Vantage CFD). */
   qty: number;
   entry: number;
   stop: number;
@@ -45,12 +51,15 @@ export type PaperState = {
 };
 
 export const DEFAULT_CONFIG: PaperConfig = {
-  // Prices from NQ front month; size as Micro (MNQ) so 0.5% risk fits realistic stops.
-  symbol: "CME_MINI:NQ1!",
+  venue: "Vantage",
+  symbol: "VANTAGE:NAS100",
+  mt5Symbol: "NAS100.r",
   equity: 50_000,
-  pointValue: 2,
-  spreadPoints: 1,
-  slippagePoints: 0.25,
+  pointValue: 1,
+  minLot: 0.1,
+  lotStep: 0.1,
+  spreadPoints: 1.2,
+  slippagePoints: 0.3,
   riskPerTradePct: 0.5,
   dailyLossHaltPct: 2,
   weeklyLossHaltPct: 5,
@@ -63,7 +72,11 @@ export const DEFAULT_CONFIG: PaperConfig = {
 export const STATE_KEY = "nas100.paper.state";
 
 export function roundTripCostPoints(config: PaperConfig): number {
-  return config.spreadPoints + 2 * config.slippagePoints;
+  return Number((config.spreadPoints + 2 * config.slippagePoints).toFixed(2));
+}
+
+function roundLots(raw: number, step: number): number {
+  return Math.floor(raw / step + 1e-9) * step;
 }
 
 export function sizeFromStop(
@@ -76,7 +89,13 @@ export function sizeFromStop(
   if (stopPoints <= 0) {
     return { qty: 0, riskDollars, stopPoints: 0 };
   }
-  const qty = Math.floor(riskDollars / (stopPoints * config.pointValue));
+  const rawLots = riskDollars / (stopPoints * config.pointValue);
+  let qty = roundLots(rawLots, config.lotStep);
+  if (qty < config.minLot) {
+    qty = 0;
+  }
+  // Avoid float dust (0.30000000004)
+  qty = Number(qty.toFixed(2));
   return { qty, riskDollars, stopPoints };
 }
 
@@ -106,7 +125,7 @@ export function applyClose(
 
 export function emptyState(config: PaperConfig = DEFAULT_CONFIG): PaperState {
   return {
-    config,
+    config: { ...DEFAULT_CONFIG, ...config },
     fills: [],
     dayPnl: 0,
     weekPnl: 0,

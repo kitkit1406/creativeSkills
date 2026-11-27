@@ -1,49 +1,63 @@
 ---
 name: nas100-instrument
-description: NAS100 / Nasdaq-100 instrument context — symbols, sessions, costs, and data conventions for paper and live study. Use when trading or analyzing NAS100, US100, USTEC, NQ, or Nasdaq-100 CFDs/futures.
-version: 1.0.0
+description: NAS100 / Nasdaq-100 instrument context for Vantage Markets CFD — symbols, sessions, lot sizing, costs, and data conventions. Use when trading or analyzing NAS100, US100, USTEC, NQ, or Nasdaq-100 CFDs/futures, especially on Vantage.
+version: 1.1.0
 ---
 
-# NAS100 Instrument
+# NAS100 Instrument (Vantage)
 
 ## Purpose
-Standardize how the desk refers to Nasdaq-100 so every strategy skill uses the same symbol, session clock, and cost assumptions.
+Standardize Nasdaq-100 references for the paper desk on **Vantage Markets**.
 
 ## Canonical symbols
 | Role | Symbol | Notes |
 | --- | --- | --- |
-| Primary paper feed | `CME_MINI:NQ1!` | Front-month E-mini Nasdaq-100 (TradingView) |
-| CFD aliases | NAS100, US100, USTEC | Broker-dependent; map once per venue |
-| Cash index | `TVC:NDX` | Spot index — not tradeable CFD |
+| Primary venue (desk default) | **Vantage** | Cash CFD |
+| TradingView feed | `VANTAGE:NAS100` | US 100 Cash CFD |
+| MT5 / MT4 symbol | `NAS100.r` (or `NAS100`) | Confirm in Market Watch — suffix can vary by account |
+| Futures reference (optional) | `VANTAGE:NAS100` | Cross-check only; not the paper fill book |
+| Cash index | `TVC:NDX` | Spot — not the CFD |
 
-Always state the exact `EXCHANGE:TICKER` used for bars and fills.
+Always state `VANTAGE:NAS100` for bars and the MT5 symbol for any platform notes.
 
-## Sessions (America/New_York)
-| Window | Clock | Desk use |
+## Contract & sizing (Vantage cash CFD)
+| Spec | Paper default |
+| --- | --- |
+| Contract size | 1 index point |
+| Point value | **$1 per point per 1.0 lot** |
+| Min lot / step | **0.1 / 0.1** |
+| Digits | 2 |
+| Quote | USD |
+
+`lots = floor( (equity × risk%) / (stop_points × $1) / 0.1 ) × 0.1`  
+If lots < 0.1 → skip the trade.
+
+## Sessions
+Vantage NAS100 CFD trades nearly 24h (typical window ~23:00–21:00 GMT; confirm in the terminal). Desk still keys **strategy decisions** to US cash clocks:
+
+| Window | America/New_York | Desk use |
 | --- | --- | --- |
-| Pre-market | 04:00–09:30 | Context only unless a skill allows it |
-| Cash open / OR | 09:30–10:00 | Opening range construction |
-| Core cash | 09:30–16:00 | Default intraday window |
-| London/NY overlap | 08:00–11:00 | Higher liquidity for scalps |
-| Flat-by | 15:55–16:00 | No overnight NAS100 paper positions |
+| Cash open / OR | 09:30–10:00 | Opening range |
+| Core cash | 09:30–16:00 | Default intraday / noise-area |
+| London/NY overlap | 08:00–11:00 | Preferred scalps |
+| Flat-by (paper) | 15:55–16:00 | No overnight paper holds (avoid swap) |
 
-Convert all timestamps to America/New_York before decisions. Report times with zone label.
+Report times to Catherine in Europe/London with zone label; convert from NY/GMT explicitly.
 
-## Cost model (paper default)
-Freeze these assumptions in the paper ledger before a week starts:
-- Spread: 1.0 NQ point round-turn equivalent (adjust per venue study)
-- Slippage: 0.25 point per side on marketable orders
-- Commission: 0 unless venue-specific
-- Point value: paper desk defaults to **MNQ $2/point** sizing on NQ prices; E-mini NQ = $20/point if explicitly configured
+## Cost model (paper default — freeze weekly)
+- Spread: ~1.2 points (re-measure from live quote; raw/standard accounts differ)
+- Slippage: 0.3 point per side on marketable orders
+- Commission: 0 on typical standard; raw accounts — use account schedule
+- Swap: charged if held overnight — paper desk flattens before NY close to avoid it
 
-Reject a setup when expected edge ≤ modeled round-turn cost.
+Reject setups when expected edge ≤ modeled round-turn cost.
 
 ## Data rules
-- Prefer closed bars for signals; forming bars are context only.
-- Intraday intervals: 1m / 5m for scalps; 5m / 15m for intraday; 1h for bias.
-- Use TradingView `mcp-tv-get-ohlcv`, `mcp-tv-get-technicals-rating`, `mcp-tv-get-economic-calendar`, `mcp-tv-get-news`.
+- Prefer closed bars; forming bars are context only.
+- Intervals: 1m/5m scalps; 5m/15m intraday; 1h bias.
+- Pull `VANTAGE:NAS100` via TradingView `mcp-tv-get-ohlcv` (and calendar/news tools as needed).
 
 ## Key rules
-- Paper-only unless Catherine explicitly authorizes live capital.
-- Never invent fills — record price, time, spread, and slippage assumptions.
-- One instrument book per paper account week (NQ front month).
+- Paper-only unless Catherine explicitly authorizes live Vantage capital.
+- Never invent fills — log mid/spread assumptions.
+- One Vantage NAS100 book per paper week.

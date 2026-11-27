@@ -2,6 +2,9 @@
 
 Agent SDK desk that paper-trades NAS100 and improves weekly.
 
+## Venue
+**Vantage Markets** NAS100 cash CFD — TradingView `VANTAGE:NAS100`, MT5 `NAS100.r`. Sized in lots ($1/point/lot, min 0.1).
+
 ## Roles
 - Desk lead (this agent)
 - `intraday-trader`, `scalper`, `risk-officer`, `weekly-coach` subagents

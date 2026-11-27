@@ -1,6 +1,7 @@
 import { defineTool } from "@grok/agent-sdk/tools";
 import * as z from "zod/v4";
 import {
+  DEFAULT_CONFIG,
   STATE_KEY,
   emptyState,
   roundTripCostPoints,
@@ -21,11 +22,13 @@ export default defineTool({
     stop: z.number(),
     target: z.number().optional(),
     notes: z.string().optional(),
-    qtyOverride: z.number().int().positive().optional(),
+    qtyOverride: z.number().positive().optional(),
   }),
   async execute(input, ctx) {
     const state =
       ((await ctx.host.kv.get(STATE_KEY)) as PaperState | null) ?? emptyState();
+    // Migrate legacy configs to Vantage defaults when fields are missing.
+    state.config = { ...DEFAULT_CONFIG, ...state.config };
     if (state.halted) {
       return {
         ok: false,
@@ -42,12 +45,14 @@ export default defineTool({
     }
     const sized = sizeFromStop(state.config, input.entry, input.stop);
     const qty = input.qtyOverride ?? sized.qty;
-    if (qty < 1) {
+    if (qty < state.config.minLot) {
       return {
         ok: false,
-        reason: "qty < 1 for stop distance — skip or use MNQ multiplier",
+        reason: `lots < ${state.config.minLot} for stop distance — skip or widen risk budget`,
         sized,
         paperOnly: true,
+        venue: state.config.venue,
+        symbol: state.config.symbol,
       };
     }
     const fill: PaperFill = {
@@ -65,6 +70,14 @@ export default defineTool({
     };
     state.fills.push(fill);
     await ctx.host.kv.put(STATE_KEY, state);
-    return { ok: true, fill, sized, paperOnly: true };
+    return {
+      ok: true,
+      fill,
+      sized,
+      paperOnly: true,
+      venue: state.config.venue,
+      symbol: state.config.symbol,
+      mt5Symbol: state.config.mt5Symbol,
+    };
   },
 });

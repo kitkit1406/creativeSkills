@@ -15,7 +15,7 @@ Trade explosive moves when NAS100 leaves a defined consolidation on closed bars 
 - **Opening-range linked**: break of the 09:30–10:00 NY range after 10:00.
 
 ## Workflow
-1. Load `CME_MINI:NQ1!` 5m (and 15m bias) via `mcp-tv-get-ohlcv`.
+1. Load `VANTAGE:NAS100` 5m (and 15m bias) via `mcp-tv-get-ohlcv`.
 2. Mark consolidation high/low and width in points and ATR(14).
 3. Require closed bar beyond the level by a predeclared buffer (default 0.15×ATR).
 4. Participation: breakout-bar volume ≥ session time-of-day median when volume is available; otherwise skip volume filter and note it.

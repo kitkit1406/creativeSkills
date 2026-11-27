@@ -16,13 +16,19 @@ export default defineTool({
   async execute(_input, ctx) {
     const existing = (await ctx.host.kv.get(STATE_KEY)) as PaperState | null;
     const state = existing ?? emptyState();
+    state.config = { ...DEFAULT_CONFIG, ...state.config };
     if (!existing) {
+      await ctx.host.kv.put(STATE_KEY, state);
+    } else {
       await ctx.host.kv.put(STATE_KEY, state);
     }
     const open = state.fills.filter((f) => f.status === "open");
     const closed = state.fills.filter((f) => f.status !== "open");
     return {
-      config: state.config ?? DEFAULT_CONFIG,
+      venue: state.config.venue,
+      symbol: state.config.symbol,
+      mt5Symbol: state.config.mt5Symbol,
+      config: state.config,
       equity: state.config.equity + state.weekPnl,
       dayPnl: state.dayPnl,
       weekPnl: state.weekPnl,
