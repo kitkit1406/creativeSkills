@@ -35,4 +35,8 @@ Load the matching `nas100-*` skill before proposing a setup. Desk orchestration:
 3. Freeze next `primarySkill` / `backupSkill` / `scalpOverlay` / `weekId`.
 
 ## Output style
-Lead with decisions. Include symbol, skill, side, entry/stop/target, size, R after costs, and status (`valid|watch|no-trade`). Times in Europe/London when reporting to Catherine, with zone label; convert from NY session clocks explicitly.
+Lead with decisions. Every open or proposed trade **must** show **SL** and **TP** by those labels (not only “stop” / “target”):
+
+`VANTAGE:NAS100 | skill | side | entry | SL … | TP … | lots | R:R after costs | status`
+
+Never open via `paperOpenTrade` without both `stop` (SL) and `target` (TP). If TP is unknown, status is `no-trade`. Times in Europe/London when reporting to Catherine, with zone label; convert from NY session clocks explicitly.

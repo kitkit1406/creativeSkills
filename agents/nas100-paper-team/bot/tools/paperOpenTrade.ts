@@ -3,7 +3,9 @@ import * as z from "zod/v4";
 import {
   DEFAULT_CONFIG,
   STATE_KEY,
+  assertSaneLevels,
   emptyState,
+  levelsForFill,
   roundTripCostPoints,
   sizeFromStop,
   type PaperFill,
@@ -13,14 +15,14 @@ import {
 
 export default defineTool({
   description:
-    "Open a NAS100 paper trade with hard stop. Refuses when halted, already in a position, or size is zero. Never places live broker orders.",
+    "Open a NAS100 paper trade with hard SL (stop) and TP (target). Both prices are required. Refuses when halted, already in a position, levels are invalid, or size is zero. Never places live broker orders.",
   effect: "write",
   inputSchema: z.object({
     skill: z.string(),
     side: z.enum(["long", "short"]),
     entry: z.number(),
-    stop: z.number(),
-    target: z.number().optional(),
+    stop: z.number().describe("Stop-loss (SL) price"),
+    target: z.number().describe("Take-profit (TP) price — required"),
     notes: z.string().optional(),
     qtyOverride: z.number().positive().optional(),
   }),
@@ -42,6 +44,15 @@ export default defineTool({
         reason: "already has an open NAS100 position",
         paperOnly: true,
       };
+    }
+    const levelError = assertSaneLevels(
+      input.side as Side,
+      input.entry,
+      input.stop,
+      input.target,
+    );
+    if (levelError) {
+      return { ok: false, reason: levelError, paperOnly: true };
     }
     const sized = sizeFromStop(state.config, input.entry, input.stop);
     const qty = input.qtyOverride ?? sized.qty;
@@ -70,9 +81,12 @@ export default defineTool({
     };
     state.fills.push(fill);
     await ctx.host.kv.put(STATE_KEY, state);
+    const levels = levelsForFill(fill);
     return {
       ok: true,
       fill,
+      levels,
+      reportLine: `${fill.side} ${fill.qty} lots @ ${fill.entry} | SL ${levels.SL} | TP ${levels.TP} | R:R ${levels.rewardRisk}`,
       sized,
       paperOnly: true,
       venue: state.config.venue,

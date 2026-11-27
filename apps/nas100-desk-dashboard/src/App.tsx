@@ -261,7 +261,7 @@ export default function App() {
                 />
               </label>
               <label>
-                Stop
+                SL (stop-loss)
                 <input
                   type="number"
                   step="0.01"
@@ -270,7 +270,7 @@ export default function App() {
                 />
               </label>
               <label>
-                Target
+                TP (take-profit)
                 <input
                   type="number"
                   step="0.01"
@@ -305,8 +305,13 @@ export default function App() {
             <h2>Manage open</h2>
             {open ? (
               <>
-                <p>
-                  {open.side} {open.qty} @ {open.entry} · stop {open.stop}
+                <p className="levels">
+                  {open.side} {open.qty} lots @ {open.entry}
+                </p>
+                <p className="levels">
+                  <strong>SL</strong> {open.stop}
+                  {" · "}
+                  <strong>TP</strong> {open.target ?? "—"}
                 </p>
                 <label>
                   Exit
@@ -346,6 +351,8 @@ export default function App() {
                     <th>Side</th>
                     <th>Lots</th>
                     <th>Entry</th>
+                    <th>SL</th>
+                    <th>TP</th>
                     <th>Exit</th>
                     <th>R</th>
                     <th>P&amp;L</th>
@@ -364,6 +371,8 @@ export default function App() {
                       <td>{f.side}</td>
                       <td>{f.qty}</td>
                       <td>{f.entry}</td>
+                      <td>{f.stop}</td>
+                      <td>{f.target ?? "—"}</td>
                       <td>{f.exit ?? "—"}</td>
                       <td>{f.rMultiple?.toFixed(2) ?? "—"}</td>
                       <td className={(f.pnl ?? 0) >= 0 ? "good" : "bad"}>

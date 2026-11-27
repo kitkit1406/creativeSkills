@@ -4,13 +4,14 @@ import {
   DEFAULT_CONFIG,
   STATE_KEY,
   emptyState,
+  levelsForFill,
   roundTripCostPoints,
   type PaperState,
 } from "../lib/paperLedger.js";
 
 export default defineTool({
   description:
-    "Read the NAS100 paper account: equity, P&L, open fills, halt status, and weekly config.",
+    "Read the NAS100 paper account: equity, P&L, open fills with SL/TP, halt status, and weekly config.",
   effect: "read",
   inputSchema: z.object({}),
   async execute(_input, ctx) {
@@ -24,6 +25,16 @@ export default defineTool({
     }
     const open = state.fills.filter((f) => f.status === "open");
     const closed = state.fills.filter((f) => f.status !== "open");
+    const openPositions = open.map((f) => {
+      const levels = levelsForFill(f);
+      return {
+        ...f,
+        SL: levels.SL,
+        TP: levels.TP,
+        levels,
+        reportLine: `${f.side} ${f.qty} lots @ ${f.entry} | SL ${levels.SL} | TP ${levels.TP ?? "MISSING"} | R:R ${levels.rewardRisk ?? "n/a"}`,
+      };
+    });
     return {
       venue: state.config.venue,
       symbol: state.config.symbol,
@@ -34,7 +45,7 @@ export default defineTool({
       weekPnl: state.weekPnl,
       halted: state.halted,
       haltReason: state.haltReason ?? null,
-      openPositions: open,
+      openPositions,
       closedCount: closed.length,
       roundTripCostPoints: roundTripCostPoints(state.config),
       lastWeeklyReview: state.lastWeeklyReview ?? null,
