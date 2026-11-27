@@ -43,6 +43,14 @@ Cursor plugin with skills for creative marketing, product builds, and a NAS100 p
 | `nas100-paper-trading-desk` | Orchestrating the paper team |
 | `nas100-weekly-improvement` | Weekly measure → one lever → freeze |
 
+## Cloud desk dashboard
+
+Published app source: [`apps/nas100-desk-dashboard/`](apps/nas100-desk-dashboard/) — team roster, skills, schedules, browser paper ledger for Vantage NAS100.
+
+```bash
+cd apps/nas100-desk-dashboard && npm install && npm run dev
+```
+
 ## Paper-trading team agent
 
 See [`agents/nas100-paper-team/`](agents/nas100-paper-team/) for an Agent SDK team that:
