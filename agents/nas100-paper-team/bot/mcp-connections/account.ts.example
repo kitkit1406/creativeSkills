@@ -1,0 +1,9 @@
+import { defineConnection } from "@grok/agent-sdk/connections";
+
+// Forwards Cursor-account MCP connectors (including TradingView when connected).
+export default defineConnection({
+  cursorAccount: true,
+  advertiseTools: true,
+  servers: ["TradingView"],
+  optional: true,
+});
