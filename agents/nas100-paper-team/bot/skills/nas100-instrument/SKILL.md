@@ -15,7 +15,7 @@ Standardize Nasdaq-100 references for the paper desk on **Vantage Markets**.
 | Primary venue (desk default) | **Vantage** | Cash CFD |
 | TradingView feed | `VANTAGE:NAS100` | US 100 Cash CFD |
 | MT5 / MT4 symbol | `NAS100.r` (or `NAS100`) | Confirm in Market Watch — suffix can vary by account |
-| Futures reference (optional) | `VANTAGE:NAS100` | Cross-check only; not the paper fill book |
+| Futures reference (optional) | `CME_MINI:NQ1!` | Cross-check only; not the paper fill book |
 | Cash index | `TVC:NDX` | Spot — not the CFD |
 
 Always state `VANTAGE:NAS100` for bars and the MT5 symbol for any platform notes.
