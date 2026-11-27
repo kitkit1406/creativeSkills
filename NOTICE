@@ -1,0 +1,5 @@
+NAS100 strategy skill structure is original work for this repository.
+General day-trading skill taxonomy (breakout, gap, momentum, news, pullback, range, scalping)
+is informed by publicly documented trading-skill collections such as SKE-Labs/agent-trading-skills
+(Apache-2.0). Noise-area momentum ideas reference published intraday-momentum research
+for educational paper-trading adaptation only.
