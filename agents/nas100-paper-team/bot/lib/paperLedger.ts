@@ -29,7 +29,9 @@ export type PaperFill = {
   /** Lot size (Vantage CFD). */
   qty: number;
   entry: number;
+  /** Hard stop / SL price. */
   stop: number;
+  /** Take-profit / TP price. Required on new opens. */
   target?: number;
   exit?: number;
   points?: number;
@@ -39,6 +41,44 @@ export type PaperFill = {
   status: "open" | "closed" | "stopped" | "target" | "flat";
   notes?: string;
 };
+
+/** User-facing SL/TP labels for Catherine (Europe/London reports). */
+export function levelsForFill(fill: Pick<PaperFill, "entry" | "stop" | "target" | "side">) {
+  const stopPoints = Math.abs(fill.entry - fill.stop);
+  const targetPoints =
+    fill.target == null ? null : Math.abs(fill.target - fill.entry);
+  const rewardRisk =
+    targetPoints != null && stopPoints > 0
+      ? Number((targetPoints / stopPoints).toFixed(2))
+      : null;
+  return {
+    SL: fill.stop,
+    TP: fill.target ?? null,
+    stopPoints: Number(stopPoints.toFixed(2)),
+    targetPoints: targetPoints == null ? null : Number(targetPoints.toFixed(2)),
+    rewardRisk,
+    side: fill.side,
+  };
+}
+
+export function assertSaneLevels(
+  side: Side,
+  entry: number,
+  stop: number,
+  target: number,
+): string | null {
+  if (!(stop > 0 && entry > 0 && target > 0)) {
+    return "entry, SL, and TP must be positive prices";
+  }
+  if (side === "long") {
+    if (!(stop < entry && entry < target)) {
+      return "long requires SL < entry < TP";
+    }
+  } else if (!(target < entry && entry < stop)) {
+    return "short requires TP < entry < SL";
+  }
+  return null;
+}
 
 export type PaperState = {
   config: PaperConfig;
